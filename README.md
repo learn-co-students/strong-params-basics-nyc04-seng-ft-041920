@@ -2,8 +2,7 @@
 
 ## What are Strong Params?
 
-To understand the goal of strong params, let's pretend that you run a pharmacy. What would happen if you let all prescription orders come through without checking for valid prescriptions, driver licenses, etc.? (Spoiler alert: you'd probably end up in jail.) It would be criminal to run a pharmacy without verifying that orders were legitimate. In the same way, Rails  wanted to shore up some security vulnerabilities. Since Rails 4+, developers are required to whitelist the parameters that are permitted to be sent to the database from a form.
-
+To understand the goal of strong params, let's pretend that you run a pharmacy. What would happen if you let all prescription orders come through without checking for valid prescriptions, driver licenses, etc.? (Spoiler alert: you'd probably end up in jail.) It would be criminal to run a pharmacy without verifying that orders were legitimate. In the same way, Rails wanted to shore up some security vulnerabilities. Since Rails 4+, developers are required to whitelist the parameters that are permitted to be sent to the database from a form.
 
 ## Setup
 
@@ -11,7 +10,7 @@ To prevent confusion, in previous lessons I manually turned off the strong param
 
 ## Why Strong Params
 
-In the Rails app in this lesson there is our blog application with Strong Params *disabled*. Create a new Post by going to `/posts/new`. Once you have created that post, go ahead and edit it at `/posts/1/edit`. You'll notice there is no Description field! In this case, I don't want the user to be able to modify the description of a post once it's been created. This happens in all kinds of different cases. You wouldn't want a bank user to be able to edit their account number or balance, would you? But! `balance` is still a field on the account class. In this case, `description` is still an attribute for the Post class. Let's see if a user could "hack" our form to be able to modify the `description`.
+In the Rails app in this lesson there is our blog application with Strong Params _disabled_. Create a new Post by going to `/posts/new`. Once you have created that post, go ahead and edit it at `/posts/1/edit`. You'll notice there is no Description field! In this case, I don't want the user to be able to modify the description of a post once it's been created. This happens in all kinds of different cases. You wouldn't want a bank user to be able to edit their account number or balance, would you? But! `balance` is still a field on the account class. In this case, `description` is still an attribute for the Post class. Let's see if a user could "hack" our form to be able to modify the `description`.
 
 1. Right click and inspect the page
 2. Find the input for title. It should look something like this: `<input type="text" value="asdferwer" name="post[title]" id="post_title">`
@@ -33,12 +32,11 @@ That is the problem that strong params were created to fix. We want to make sure
 
 ## Code Implementation
 
-
 Let's enable Strong Params. To do this, open up `config/application.rb` and delete the line that says: `config.action_controller.permit_all_parameters = true`. Now restart your rails server and navigate to `localhost:3000/posts/new`. Once there fill out the form and click `submit`. You'll see we get the following `ForbiddenAttributesError`:
 
 ![ForbiddenAttributesError](https://s3.amazonaws.com/flatiron-bucket/readme-lessons/ForbiddenAttributesError.png)
 
-What this means is that Rails needs to be told what parameters are allowed to be submitted through the form to the database. The default is to let *nothing* through.
+What this means is that Rails needs to be told what parameters are allowed to be submitted through the form to the database. The default is to let _nothing_ through.
 
 The same error would occur if you were trying to update a record. So how do we fix this? Let's update the `create` and `update` methods to look like the code below:
 
@@ -64,11 +62,9 @@ If you go back to the web browser and click refresh you'll see everything is wor
 
 What is the deal with `#permit` vs `#require`? The `#require` method is the most restrictive. It means that the `params` that get passed in **must** contain a key called "post". If it's not included then it fails and the user gets an error. The `#permit` method is a bit looser. It means that the `params` hash **may** have whatever keys are in it. So in the `create` case, it may have the `:title` and `:description` keys. If it doesn't have one of those keys it's no problem: the hash just won't accept any other keys.
 
-
 ## DRYing up Strong Params
 
 The code we wrote above is great if you only have a `create` method in your controller. However, if you have a standard CRUD setup you will also need to implement the same code in your `update` action. In our example we had different code for `create` and `update`, but generally you have the same items. It's a standard Rails practice to remove code repetition, so let's abstract the strong parameter call into its own method in the controller:
-
 
 ```ruby
 # app/controllers/posts_controller.rb
